@@ -53,6 +53,8 @@ When a timer is active:
 
 The "disclaimer" would be that, at least for the initial versions of the app, **there can be various edge cases unaccounted for.** I did a LOT of testing, but there were multiple layered factors that went into various coding decision points.
 
+[2020-07-01 Update] - Some major bug fixes have helped with tab and app focus and navigation, with a mindset for only creating an alarm on 'an initial visit' of a 'matching and active page'. However, navigational bugs may still exist.
+
 ### #4 - Important Storage FAQs
 
 The 'storage' that your URL info list is stored on is inside the browser and is only available if the browser supports the 'chrome.storage.sync' API.
@@ -144,8 +146,6 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
 ### #7 - Known Issues
 
-- Typically, interaction with other tabs, even if not actively changing from an active and timed tab, will likely stop or reset that active tab's timer. For instance, while on a timed page, closing another tab will reset that current active tab's timer.
-
 - If you 'miss' clicking OK or Cancel on three or more confirms, the extension's icon stops counting after the first two increments. If your last click was Cancel, the next Cancel will increment the counter normally again.
 
 - There are some rules for what to do when the madness stops, however, this is also a likely location for some unaccounted for edge cases. The rules for this are as follows:
@@ -156,6 +156,9 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
   - Or the second tab if the first is active.
 
+- In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
+  This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)
+
 #### Open Source
 
 As with my first two Chrome extensions, the code is open source and available on GitHub.
@@ -165,6 +168,49 @@ I'm also open to Pull Requests and possibly even contributors.
 ### #8 - Contact / Support
 
 If you have a bug or feature request, please feel free to [submit a new issue on GitHub](https://github.com/KDCinfo/too-much-time/issues). Feel free to [submit Pull Requests](https://github.com/KDCinfo/too-much-time/pulls) for consideration as well.If you need to contact me directly, you can use [the contact form on my portfolio site](https://kdcinfo.com/?contact).
+
+### Ancillary and Miscellaneous
+
+*Chrome Web Store Listing Information*
+
+Too-Much-Time is a simple browser extension that allows you to 'time' the time you spend on certain websites.
+
+> When the time you specify is up, you'll get an alert offering you the opportunity to stop or snooze.
+> To use, you'll simply provide a portion of the URL (domain) you'd like to time your time on.
+
+Situational Examples:
+  - If you find you've been spending a little more time than you would prefer on your favorite social networking site.
+  - Or perhaps you'd like to time your shopping on your favorite eCommerce site.
+  - Perhaps you'd like to time your efforts spent researching through an informational site.
+  - Or put in 'just enough' reading on a particular reading site before bed.
+
+The intent of this extension was to be an annoyance to help get you (okay, me) off websites that you (*I) spend a tad too much time on.
+
+Available on 'Chromium-based browsers'* such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+
+> Chromium-based Browser References:
+
+  - https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
+  - https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
+
+---
+
+> Storage
+
+Storage is used to store a list of the user's extension information (partial URL names and their individual settings). That stored information is used to determine if an alarm should be set for a matched page, or not.
+
+> Alarms
+
+When a user's current page matches an item in the user's storage list, an alarm is set according to the settings that the user set for that item.
+
+> Tabs
+
+Detection of switching between tabs and other tab activity allows storage to be updated as well as for alarms to be stopped or started.
+
+> Host permission
+
+When a page is first hit*, the background script grabs the URL from the content script. A user has the ability to match any URL they visit. And for any matched page, an alarm will be set for that matched host.
+*On initial page load, for `onUpdated`: `changeInfo.url` wasn't available, so a `sendMessage` is sent to the content script requesting the `location.href` be sent back for matching. Otherwise, the URL is retrieved from: `chrome.tabs.query({active: true, currentWindow: true}, function(tabs) { // tabs[0].url }`
 
 ---
 

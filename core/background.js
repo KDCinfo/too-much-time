@@ -36,35 +36,21 @@ var inFocus = true; // Global boolean to keep track of window state.
 
 chrome.runtime.onInstalled.addListener(function() {
 
-  // Changing Tabs
+  syncData('onInstalled').then(syncResponse => {
+    // @TODO: Need an error management messaging system
 
-  chrome.tabs.onActivated.addListener(function (activeInfo) {
-    checkAndSetTimer('runtime.onInstalled');
-  })
+    // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
+  }); // Initialize extension data with storage.
 
-  // Changing Application Windows
-  //
-  // Many thanks to: https://stackoverflow.com/questions/2574204/detect-browser-focus-out-of-focus-via-google-chrome-extension
-
-  chrome.windows.onFocusChanged.addListener( function(window) {
-
-    if (window == chrome.windows.WINDOW_ID_NONE) {
-      inFocus = false;
-    } else {
-
-      if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-        checkAndSetTimer('windows.onFocusChanged');
-      }
-
-      inFocus = true;
-    }
-  });
+});
 
   // URL Page Loads and Refreshes - ON URL CHANGE - Trigger URL check and alarm creation.
   //
   // Many thanks to: https://stackoverflow.com/questions/34957319/how-to-listen-for-url-change-with-chrome-extension
 
   chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+
+    if (showConsoleLogs) { console.log('[1c] onUpdated -> sendMessage [changeInfo.status]', changeInfo); }
 
     // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
     //
@@ -79,6 +65,37 @@ chrome.runtime.onInstalled.addListener(function() {
     }
   })
 
+  // Changing Tabs
+
+  chrome.tabs.onActivated.addListener(function (activeInfo) {
+
+    if (showConsoleLogs) { console.log('[1a] onActivated -> checkAndSetTimer [activeInfo]', activeInfo); }
+
+    checkAndSetTimer('runtime.onInstalled');
+  })
+
+  // Changing Application Windows
+  //
+  // Many thanks to: https://stackoverflow.com/questions/2574204/detect-browser-focus-out-of-focus-via-google-chrome-extension
+
+  chrome.windows.onFocusChanged.addListener( function(window) {
+
+    // if (showConsoleLogs) { console.log('[1b] onFocusChanged -> [inFocus] [ID_NONE == window]', inFocus, window); }
+
+    if (window == chrome.windows.WINDOW_ID_NONE) {
+      inFocus = false; // Chrome does not have focus
+    } else {
+
+      checkAndSetTimer('windows.onFocusChanged');
+      // 'onFocusChanged' is unreliable. Focusing instead on tmtConfig.lastMatch logic inside function.
+      // if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
+      //   checkAndSetTimer('windows.onFocusChanged');
+      // }
+
+      inFocus = true;
+    }
+  });
+
   // Closing Tabs
 
   chrome.tabs.onRemoved.addListener(function() {
@@ -88,16 +105,9 @@ chrome.runtime.onInstalled.addListener(function() {
     // deleteAllTimers().then(response => {
     //   // console.log('onRemoved deleteAllTimers() complete.');
     // });
-    if (showConsoleLogs) { console.log('onRemoved -> checkAndSetTimer'); }
+    if (showConsoleLogs) { console.log('[1d] onRemoved -> checkAndSetTimer'); }
     checkAndSetTimer('tabs.onRemoved');
   })
-
-  syncData().then(syncResponse => {
-    // @TODO: Need an error management messaging system
-
-    // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
-  }); // Initialize extension data with storage.
-});
 
 /**
  * ALARM MANAGEMENT
@@ -113,16 +123,12 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
     let urlItem = validateUrl(request.url);
     //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-    // @TODO: Maybe provide an option to reset the timer on each 'page change' vs a
-    // 'match change'. Just need to enter this clause. Maybe set 'lastWatch' to '' (an
-    // empty string, so it's always false) or set an override 'disregardLastWatch = true'.
-
-    if (urlItem === false || urlItem.url !== tmtConfig.lastMatch) {
-
-      tmtConfig.lastMatch = urlItem.url;
+    if (urlItem === false || urlItem.title !== tmtConfig.lastMatch) {
 
       deleteAllTimers().then(resp => {
         if (urlItem !== false) {
+
+          tmtConfig.lastMatch = urlItem.title;
 
           if (urlItem.active) {
 
@@ -133,7 +139,6 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
               if (showConsoleLogs) { console.log('createTimer: ' + response); }
             });
           } else {
-            tmtConfig.lastMatch = '';
             setBadge(badgeSleepColor, badgeSleepText); // Matched, but Inactive. @TODO: Maybe change badge text.
           }
         } else {
@@ -150,7 +155,7 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
   } else if (request.action === 'formSave') {
 
-    syncData().then(syncResponse => {
+    syncData('onMessage formSave').then(syncResponse => {
       let syncDataMsg;
       if (syncResponse === false) {
         syncDataMsg = false;
@@ -196,13 +201,16 @@ function validateUrl(urlToCheck) {
   // ]);
 
   let foundItemUrl = arrayToMatchFromStorage.find(url => {
-    if (showConsoleLogs) { console.log('... ... find [url]', url); }
+    // if (showConsoleLogs) { console.log('... ... find [url]', url); }
     return urlToCheck.includes(url);
   });
 
   if (showConsoleLogs) { console.log('foundItemUrl', urlToCheck, foundItemUrl); }
 
-  if (foundItemUrl !== undefined) {
+  if (foundItemUrl !== undefined && foundItemUrl !== 'chrome') {
+
+    // ^^^ Brave returns: 'chrome' | Chrome, Opera, Vivaldi return: undefined
+
     let foundItem = mapFromStorage.get(foundItemUrl);
     if (foundItemUrl) {
       return foundItem; // Item ID: 0, 1, 2...
@@ -285,49 +293,68 @@ function deleteAllTimers() {
 
 function checkAndSetTimer(src = '') {
 
-  if (showConsoleLogs) { console.log('___ Function: checkAndSetTimer', src); }
+  if (showConsoleLogs) { console.log('[2] ___: checkAndSetTimer', src); }
 
-  deleteAllTimers().then(resp => {
+  try {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
-    try {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+       // https://stackoverflow.com/questions/6132018/how-can-i-get-the-current-tab-url-for-chrome-extension
+       // Since only one tab should be active and in the current window
+       // at once, the return variable should only have one entry.
+       // var activeTab = tabs[0];
+       // var activeTabId = activeTab.id; // or do whatever you need
 
-         // https://stackoverflow.com/questions/6132018/how-can-i-get-the-current-tab-url-for-chrome-extension
-         // Since only one tab should be active and in the current window
-         // at once, the return variable should only have one entry.
-         // var activeTab = tabs[0];
-         // var activeTabId = activeTab.id; // or do whatever you need
+      if (tabs.length > 0) {
 
-        if (tabs.length > 0) {
+        const currentUrl = tabs[0].url;
+        // currentTabId = tabs[0].id;
 
-          const currentUrl = tabs[0].url;
-          // currentTabId = tabs[0].id;
+        let urlItem = validateUrl(currentUrl);
+        //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-          let urlItem = validateUrl(currentUrl);
-          //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
+        if (urlItem === false || urlItem.title !== tmtConfig.lastMatch) { // .title .url
 
-          if (urlItem !== false) {
-            if (urlItem.active) {
-              setBadge(badgeWatchColor, badgeWatchText);
-              createTimer(urlItem).then(response => {
-                if (showConsoleLogs) { console.log('createTimer: ' + response); }
-              }); // true|false
+          if (showConsoleLogs) { console.log('[2aa] New Page; or Not Old Page; Delete Timer; Try to create'); }
+          if (showConsoleLogs) { console.log('[2ab]', currentUrl, urlItem, tmtConfig); }
+
+          deleteAllTimers().then(resp => {
+            if (urlItem !== false) {
+
+              tmtConfig.lastMatch = urlItem.title;
+
+              if (urlItem.active) {
+
+                setBadge(badgeWatchColor, badgeWatchText);
+                // setBadge(badgeWatchColor, urlItem.delay + '_' + urlItem.snooze);
+                // ^^^ Badge only allows 4 chars.     ^^^ Delay and snooze ^^^ can both be 2 digits.
+                if (showConsoleLogs) { console.log('[2b] Matched; Active; Creating Timer'); }
+                createTimer(urlItem).then(response => {
+                  if (showConsoleLogs) { console.log('createTimer: ' + response); }
+                });
+              } else {
+
+                setBadge(badgeSleepColor, badgeSleepText); // Matched, but Inactive. @TODO: Maybe change badge text.
+                if (showConsoleLogs) { console.log('[2c] Matched; Inactive'); }
+              }
+            } else {
+              tmtConfig.lastMatch = '';
+              setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
+              if (showConsoleLogs) { console.log('[2d] No match; Not timed'); }
             }
-          } else {
-            setBadge(badgeSleepColor, badgeSleepText);
-            if (showConsoleLogs) { console.log('Site not timed.'); }
-          }
+          });
+        } else {
+          if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, tmtConfig); }
+          // We're on the same matching URL; let the timer run; do nothing.
         }
-
-      });
-
-    } catch(err) {
-      if (showConsoleLogs) {
-        console.log('checkAndSetTimer deleteAllTimers catch error');
-        console.log(err);
       }
+    });
+
+  } catch(err) {
+    if (showConsoleLogs) {
+      console.log('checkAndSetTimer deleteAllTimers catch error');
+      console.log(err);
     }
-  });
+  }
 }
 
 /**

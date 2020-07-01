@@ -135,6 +135,11 @@
                 The "disclaimer" would be that, at least for the initial versions of the app, <b>there can be various edge cases unaccounted for.</b>
                 I did a LOT of testing, but there were multiple layered factors that went into various coding decision points.
               </li>
+              <li>
+                [2020-07-01 Update] - Some major bug fixes have helped with tab and app focus and navigation,
+                with a mindset for only creating an alarm on 'an initial visit' of a 'matching and active page'.
+                However, navigational bugs may still exist.
+              </li>
 
               <!--   FAQ   FAQ   FAQ   FAQ   FAQ   FAQ   FAQ   FAQ   FAQ   -->
               <li>
@@ -280,13 +285,6 @@
               <li>
                 <ul>
                   <li>
-                    - Typically, interaction with other tabs, even if
-                      not actively changing from an active and timed
-                      tab, will likely stop or reset that active tab's
-                      timer. For instance, while on a timed page, closing
-                      another tab will reset that current active tab's timer.
-                  </li>
-                  <li>
                     - If you 'miss' clicking OK or Cancel on three or more confirms,
                       the extension's icon stops counting after the first two increments.
                       If your last click was Cancel, the next Cancel will increment the counter normally again.
@@ -300,6 +298,10 @@
                       <li>Or, we'll switch to the first tab in the window if it is not already</li>
                       <li>the currently active tab, or the second tab if the first is active.</li>
                     </ul>
+                  </li>
+                  <li>
+                    - In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
+                      This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)
                   </li>
                 </ul>
               </li>
