@@ -438,13 +438,13 @@ footer {
     .footer-faq-div {
       background-color: #ffffff;
       border-radius: 15px;
-      max-height: 440px;
+      max-height: 425px;
       max-width: 520px;
       overflow-y: auto;
       padding: 0.0em 0.5em 0.5em 0;
       position: absolute;
         left: 0;
-        bottom: 2rem;
+        bottom: 2.2rem;
         z-index: 5;
       transform: scale(1, 0);
       transform-origin: bottom left;
