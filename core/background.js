@@ -403,6 +403,12 @@ function checkAndSetTimer(src = '') {
           if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, tmtConfig); }
           // We're on the same matching URL; let the timer run; do nothing.
         }
+      } else {
+        if (showConsoleLogs) { console.log('[2f] Chrome lost focus. Delete timer; clear lastMatch and badge.'); }
+        deleteAllTimers().then(resp => {
+          tmtConfig.lastMatch = '';
+          setBadge(badgeSleepColor, badgeSleepText);   // No tabs; Chrome no longer has focus.
+        });
       }
     });
 
