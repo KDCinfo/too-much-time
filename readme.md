@@ -166,7 +166,7 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
   If you find a timer will not start on a page it should, and these items are in order, and if you can recreate it, please send me the steps to recreate it via the issues tab in GitHub.
 
-  *To fix the issue*, you can just go to the timed page, open the extension's popup, then deactivate and reactive the affected URL. Refreshing the page may also trigger the timer.
+  *To fix the issue*; refreshing the page should trigger the timer.
 
   However! I'm actually hoping to never see the issue again as I've applied numerous proactive fixes. <code>:)</code>
 
