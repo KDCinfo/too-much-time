@@ -194,6 +194,9 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
   } else if (request.action === 'formSave') {
 
     syncData('onMessage formSave').then(syncResponse => {
+
+      if (showConsoleLogs) { console.log('onMessage -> formSave -> syncData', syncResponse); }
+
       let syncDataMsg;
       if (syncResponse === false) {
         syncDataMsg = false;
@@ -354,6 +357,8 @@ function checkAndSetTimer(src = '') {
        // at once, the return variable should only have one entry.
        // var activeTab = tabs[0];
        // var activeTabId = activeTab.id; // or do whatever you need
+
+      if (showConsoleLogs) { console.log('[2_] ___: query tabs', tabs); }
 
       if (tabs.length > 0) {
 
