@@ -202,6 +202,7 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
         syncDataMsg = false;
       } else {
         syncDataMsg = "Good 'post-storage.set' live data update.";
+        tmtConfig.lastMatch = ''; // We're in the popup; A save terminates the lastMatch protocol.
         checkAndSetTimer('request.action === formSave');
       }
       sendResponse({status: syncDataMsg});
