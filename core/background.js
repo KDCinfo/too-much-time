@@ -13,6 +13,7 @@
 chrome.browserAction.setBadgeBackgroundColor({color: 'orange'});
 
 let showConsoleLogs = false;
+// let showConsoleLogs = true;
 
 if (showConsoleLogs) { console.clear(); }
 
@@ -37,6 +38,7 @@ var inFocus = true; // Global boolean to keep track of window state.
 chrome.runtime.onInstalled.addListener(function() {
 
   syncData('onInstalled').then(syncResponse => {
+    checkAndSetTimer('runtime.onInstalled');
     // @TODO: Need an error management messaging system
 
     // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
@@ -71,7 +73,29 @@ chrome.runtime.onInstalled.addListener(function() {
 
     if (showConsoleLogs) { console.log('[1a] onActivated -> checkAndSetTimer [activeInfo]', activeInfo); }
 
-    checkAndSetTimer('runtime.onInstalled');
+    // checkAndSetTimer('runtime.onInstalled');
+
+    //  /\ Gonna try to sync data during 'onActivated' due to intermittent issues with validateUrl not matching.
+    //  |
+    // \/  Happens sometimes when you click on a tab that should be timed, but an alarm isn't set.
+    //
+    //     Have seen at least three times, but only once with logs turned on (which is how
+    //     I know it's the validateUrl; and added logs to see the comparison array and map,
+    //     because the compareTo Url was correct, so wondering if the data somehow
+    //     wasn't populated maybe?), but haven't been able to recreate hence.
+
+    // The issue may also not be recreateable whilst the background Dev Tools is open, or while
+    // console.logging is taking place, as, if there is a race condition somewhere, these could be
+    // injecting enough asynchronicity for the issue to pass (like adding a setTimeout(()=>{},0)).
+
+    syncData('onActivated').then(syncResponse => {
+      // @TODO: Need an error management messaging system
+
+      checkAndSetTimer('runtime.onInstalled');
+
+      // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
+    }); // Initialize extension data with storage.
+
   })
 
   // Changing Application Windows
@@ -84,6 +108,19 @@ chrome.runtime.onInstalled.addListener(function() {
 
     if (window == chrome.windows.WINDOW_ID_NONE) {
       inFocus = false; // Chrome does not have focus
+
+      // Cannot try to stop timer onFocusChanged because it doesn't always
+      // fire as expected. And in doing this, the timer stops when opening
+      // the popup, and sometimes when opening the right-click context menu.
+
+      // In other cases, 'onFocusChanged' IS NEVER HIT.
+      //
+      //   So unreliable!! (...or maybe just misunderstood. Misnomer perhaps?)
+      //
+      // deleteAllTimers().then(resp => {
+      //   tmtConfig.lastMatch = '';
+      //   setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
+      // });
     } else {
 
       checkAndSetTimer('windows.onFocusChanged');
@@ -106,6 +143,7 @@ chrome.runtime.onInstalled.addListener(function() {
     //   // console.log('onRemoved deleteAllTimers() complete.');
     // });
     if (showConsoleLogs) { console.log('[1d] onRemoved -> checkAndSetTimer'); }
+
     checkAndSetTimer('tabs.onRemoved');
   })
 
@@ -161,6 +199,7 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
         syncDataMsg = false;
       } else {
         syncDataMsg = "Good 'post-storage.set' live data update.";
+        checkAndSetTimer('request.action === formSave');
       }
       sendResponse({status: syncDataMsg});
     });
@@ -171,7 +210,16 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
       if (showConsoleLogs) { console.log('onMessage -> clear -> deleteAllTimers', response); }
 
-      sendResponse({status: 'success'});
+      syncData('onMessage formSave').then(syncResponse => {
+        let syncDataMsg;
+        if (syncResponse === false) {
+          syncDataMsg = false;
+        } else {
+          syncDataMsg = "Good Clear.";
+          checkAndSetTimer('request.action === clear');
+        }
+        sendResponse({status: syncDataMsg});
+      });
     }); // true|false
     // deleteTimer(request.itemId).then(response => console.log('deleteTimer: ' + response)); // true|false
   }
@@ -200,8 +248,11 @@ function validateUrl(urlToCheck) {
   //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
   // ]);
 
+  if (showConsoleLogs) { console.log('|| arrayToMatchFromStorage | mapFromStorage ||'); }
+  if (showConsoleLogs) { console.log(arrayToMatchFromStorage, mapFromStorage); }
+  if (showConsoleLogs) { console.log('|| _______________________ | ______________ ||'); }
   let foundItemUrl = arrayToMatchFromStorage.find(url => {
-    // if (showConsoleLogs) { console.log('... ... find [url]', url); }
+    if (showConsoleLogs) { console.log('... ... find [url]', url); }
     return urlToCheck.includes(url);
   });
 
@@ -505,7 +556,7 @@ function syncData() {
           });
         }
 
-        checkAndSetTimer('sync.get');
+        // checkAndSetTimer('sync.get');
         resolve('Successful data sync.');
       });
     } catch(err) {
@@ -559,3 +610,10 @@ function isGood(objStr) {
     return typeof(objStr) !== 'undefined';
   }
 }
+
+syncData('[background] inline load - EOF').then(syncResponse => {
+  // checkAndSetTimer('runtime.onInstalled');
+  // @TODO: Need an error management messaging system
+
+  // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
+}); // Initialize extension data with storage.

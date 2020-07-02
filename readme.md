@@ -41,13 +41,23 @@ Steps to Use (after installing):
 
 > Side Note: You can only have one "active" browser tab "active" at any one time, ergo, you will only have one possible timer going at any given time.
 
-When a timer is active:
+*When a timer is active:*
 
 **>** So long as you stay on one tab, and so long as you stay **within the same matched URL string**, the timer will continue to count down per that matched URL info's settings (i.e. its delay and snooze settings).
 
-**Navigating to another site, another tab, or closing another tab, will all affect (stop or restart) any active timer.**
+**Navigating to another site, another tab, or closing another tab, could all affect (stop or restart) an active timer.**
 
 **>** When your preset number of minutes has expired, the browser will throw up an "Alert" dialog box. More specifically, it's a "Confirm" dialog box, in which you can opt to 'snooze,' and continue browsing the currently matched URL, or you can click OK to "end the madness!!"
+
+*The rules for "Stopping the madness!!" are as follows:*
+
+  Note: This is a likely location for some unaccounted for edge cases (i.e. bugs).
+
+  1. If only one tab is open (the tab you're timing), we'll open a new blank tab.
+  2. Or if there is more than one tab open, we'll switch to the first tab---if it is not already
+  3. the currently active tab. If it is, we'll instead activate the second tab.
+
+  - _Note:_ If a 'matched page' occupies tab #1 or tab #2, a timer will be started for that matched page.
 
 ### #3 - Disclaimer (aka, 'edge cases' suck)
 
@@ -146,15 +156,19 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
 ### #7 - Known Issues
 
-- If you 'miss' clicking OK or Cancel on three or more confirms, the extension's icon stops counting after the first two increments. If your last click was Cancel, the next Cancel will increment the counter normally again.
+- If you 'miss' clicking OK or Cancel on three or more confirms,
+  the extension's icon stops counting after the first two increments.
+  If your last click was Cancel, the next Cancel will increment the counter normally again.
 
-- There are some rules for what to do when the madness stops, however, this is also a likely location for some unaccounted for edge cases. The rules for this are as follows:
+- I ran across an intermittent issue in which, navigating to a 'matched page' did not start the timer as expected.
 
-  - We're either going to open a new tab if only one tab is open.
+  > Double check the URL should indeed be a match, and that it is indeed active.
 
-  - Or, we'll switch to the first tab in the window if it is not already the currently active tab,
+  If you find a timer will not start on a page it should, and these items are in order, and if you can recreate it, please send me the steps to recreate it via the issues tab in GitHub.
 
-  - Or the second tab if the first is active.
+  *To fix the issue*, you can just go to the timed page, open the extension's popup, then deactivate and reactive the affected URL. Refreshing the page may also trigger the timer.
+
+  However! I'm actually hoping to never see the issue again as I've applied numerous proactive fixes. <code>:)</code>
 
 - In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
   This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)

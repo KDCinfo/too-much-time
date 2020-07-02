@@ -144,7 +144,7 @@ function displayIt() { // [window|document].onload = function() {}
   // <a>: Import - FillSampleJSON
   document.getElementById('TooMuchTimeClearTimer').addEventListener('click', (e) => {
     e.preventDefault();
-    clearTimerPrep().then(responseOrFalse => {
+    sendMessageToClear().then(responseOrFalse => {
       // @TODO: Change icon to be a green color.
       // When clearing (in background) set to be normal icon color.
     }).catch(reason => {
@@ -283,7 +283,7 @@ const tmtStorage = (function() {
   };
 })(); // <-- Does not work without IIFE (same with how MDN wrote 'LocalStorageState' interface (far below).)
 
-function clearTimerPrep() { // async / returns a Promise
+function sendMessageToClear() { // async / returns a Promise
 
   return new Promise((resolve, reject) => {
     if (isGood('chrome') && isGood('chrome.runtime') && isGood('chrome.runtime.sendMessage')) {
@@ -1290,9 +1290,17 @@ function clearTimersAndStorage() {
     if (window.confirm('Click OK if you are certain you\'d like to remove all of your expiration items and alarms.')) {
       chrome.alarms.clearAll( () => {
         chrome.storage.sync.clear( () => {
-          ourState.length = 0;
-          showList();
-          updateForm();
+          sendMessageToClear().then(responseOrFalse => {
+            // @TODO: Change icon to be a green color.
+            // When clearing (in background) set to be normal icon color.
+            ourState.length = 0;
+            showList();
+            updateForm();
+          }).catch(reason => {
+            // @TODO: Change icon to be a red color.
+            if (isTesting) { console.log('cTAS reason', reason); }
+          });
+
         });
       });
     }

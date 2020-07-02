@@ -189,6 +189,19 @@
                   <li><b>></b> When your preset number of minutes has expired, the browser will throw up an "Alert" dialog box.
                   More specifically, it's a "Confirm" dialog box, in which you can opt to 'snooze,' and continue browsing
                   the currently matched URL, or you can click OK to "end the madness!!"</li>
+
+                  <li>
+                    <u>The rules for "Stopping the madness!!" are as follows:</u>
+                    <ol>
+                      <li>If only one tab is open (the tab you're timing), we'll open a new blank tab.</li>
+                      <li>Or if there is more than one tab open, we'll switch to the first tab---if it is not already</li>
+                      <li>the currently active tab. If it is, we'll instead activate the second tab.</li>
+                    </ol>
+                    <ul>
+                      <li>Note: This is a likely location for some unaccounted for edge cases (i.e. bugs).</li>
+                      <li>Note: If a 'matched page' occupies tab #1 or tab #2, a timer will be started for that matched page.</li>
+                    </ul>
+                  </li>
                 </ul>
               </li>
 
@@ -355,18 +368,18 @@
                       If your last click was Cancel, the next Cancel will increment the counter normally again.
                   </li>
                   <li>
-                    - There are some rules for what to do when the madness stops, however,
-                      this is also a likely location for some unaccounted for edge cases.
-                      The rules for this are as follows:
+                    - I ran across an intermittent issue in which, navigating to a 'matched page' did not start the timer as expected.
                     <ul>
-                      <li>We're either going to open a new tab if only one tab is open.</li>
-                      <li>Or, we'll switch to the first tab in the window if it is not already</li>
-                      <li>the currently active tab, or the second tab if the first is active.</li>
+                      <li>&rarr; Double check the URL should indeed be a match, and that it is indeed active.</li>
+                      <li><b>To fix the issue</b>, you can just go to the timed page, open the extension's popup, then deactivate and reactive the affected URL.</li>
+                      <li>Refreshing the page may also trigger the timer.</li>
                     </ul>
+                    <p>If you come across this issue, and if you can recreate it, please send me the steps to recreate it via the issues tab in GitHub.</p>
+                    <p>However! I'm actually hoping to never see the issue again as I've applied numerous proactive fixes. <code>:)</code></p>
                   </li>
                   <li>
                     - In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
-                      This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)
+                      This is unfortunate being this is the browser I use to peruse Twitter. @TODO: <code>:)</code>
                   </li>
                 </ul>
               </li>
