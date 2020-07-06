@@ -130,11 +130,6 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
   - @11:21 PM - End of Functional Coding (4.5 days)
 
-    - - Turned off timer on kdcinfo.com (didn't know it was on).
-      - After about 8 click thoughts, it switched over to the google tab and started a new timer.
-      - I switched it back to kdcinfo, opened the extension, and clicked the Clear Active Timer button.
-      - It never went back on. The delete button functionality was the final fix.
-
 - Sun 06/28
 
   - @12:16 PM - End of Coding (3rd Chrome Extension: 5 days)
