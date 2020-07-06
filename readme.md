@@ -18,15 +18,15 @@ Situational Examples:
 
 The intent of this extension was to be an annoyance to help get you (okay, me) off websites that you (*I) spend a tad too much time on.
 
-**Installation**
+### #2 - Installation
 
   - From within your favorite browser, navigate to the [Chrome Web Store](https://chrome.google.com/webstore/detail/too-much-time/okogpcjdmbagmocinoialgklbbjalbfn?hl=en&authuser=0) and click the "Add to Browser" button.
 
-> Available for 'Chromium-based browsers'`*` such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+> Available for 'Chromium-based browsers'`*` such as Chrome, Brave, Microsoft Edge, Opera, Vivaldi, Comodo Dragon, etc.
 
-> Chrome Browser Note: Note that if you're installing this extension on the Chrome browser, after installing the extension, it may not be immediately visible on your toolbar. To be able to see your icon's timer count, you'll need to 'pin' the extension to the browser's toolbar by selecting the 'puzzle' icon on the toolbar.
+> **Chrome Browser Note:** If you're installing this extension on the Chrome browser, after installing the extension, it may not be immediately visible on your toolbar. To be able to see your icon's timer count, you'll need to 'pin' the extension to the browser's toolbar by selecting the 'puzzle' icon on the toolbar.
 
-### #2 - Usage Instructions
+### #3 - Usage Instructions
 
 Steps to Use (after installing):
 
@@ -59,13 +59,13 @@ Steps to Use (after installing):
 
   - _Note:_ If a 'matched page' occupies tab #1 or tab #2, a timer will be started for that matched page.
 
-### #3 - Disclaimer (aka, 'edge cases' suck)
+### #4 - Disclaimer (aka, 'edge cases' suck)
 
 The "disclaimer" would be that, at least for the initial versions of the app, **there can be various edge cases unaccounted for.** I did a LOT of testing, but there were multiple layered factors that went into various coding decision points.
 
 [2020-07-01 Update] - Some major bug fixes have helped with tab and app focus and navigation, with a mindset for only creating an alarm on 'an initial visit' of a 'matching and active page'. However, navigational bugs may still exist.
 
-### #4 - Important Storage FAQs
+### #5 - Important Storage FAQs
 
 The 'storage' that your URL info list is stored on is inside the browser and is only available if the browser supports the 'chrome.storage.sync' API.
 
@@ -75,7 +75,7 @@ Your list should be considered as 'vulnerable and **susceptible to deletion**.' 
 
 The storage pertains only to the browser you're using (unless your Chrome account is synced).
 
-### #5 - Important Reminder
+### #6 - Important Reminder
 
 Due to the URL info list being stored inside your browser, it is strongly advised to...
 
@@ -99,7 +99,7 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 6.  Click the "Import JSON" button.
 7.  The app will then import each URL item individually, and will provide an import progress status bar during the import process.
 
-### #6 - App History
+### #7 - App History
 
 - This extension was a personal project to accomplish something during—and break the monotony of—my mobile app development learning curve.
 
@@ -154,7 +154,7 @@ Due to the URL info list being stored inside your browser, it is strongly advise
   - Having to create the assets.
   - Details, details, and more details. E.g., What to do when changing tabs. How to handle the extension's pop-up being open. An approach for handling multiple URLs. How to handle overlapping (queued) confirm dialog boxes (this was a doozy!)
 
-### #7 - Known Issues
+### #8 - Known Issues
 
 - If you 'miss' clicking OK or Cancel on three or more confirms,
   the extension's icon stops counting after the first two increments.
@@ -183,7 +183,7 @@ As with my first two Chrome extensions, the code is open source and available on
 If you come across a bug, feel free to look at the code, and see if you can find a fix.
 I'm also open to Pull Requests and possibly even contributors.
 
-### #8 - Contact / Support
+### #9 - Contact / Support
 
 If you have a bug or feature request, please feel free to [submit a new issue on GitHub](https://github.com/KDCinfo/too-much-time/issues). Feel free to [submit Pull Requests](https://github.com/KDCinfo/too-much-time/pulls) for consideration as well.If you need to contact me directly, you can use [the contact form on my portfolio site](https://kdcinfo.com/?contact).
 
