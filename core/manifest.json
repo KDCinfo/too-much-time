@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Too-Much-Time",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Be more conscious of the time you spend on specific websites.",
   "icons": { "16": "icon16.png",
              "32": "icon32.png",
@@ -9,6 +9,7 @@
              "48": "icon48.png",
              "72": "icon72.png",
              "96": "icon96.png",
+            "128": "icon128.png",
             "144": "icon144.png",
             "192": "icon192.png",
             "256": "icon256.png" },

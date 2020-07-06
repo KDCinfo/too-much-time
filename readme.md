@@ -10,8 +10,6 @@
 
 > When the time you specify is up, you'll get an alert offering you the opportunity to stop or snooze.
 
-> To use, you'll simply provide a portion of the URL (domain) you'd like to time your time on.
-
 Situational Examples:
   - If you find you've been spending a little more time than you would prefer on your favorite social networking site.
   - Or perhaps you'd like to time your shopping on your favorite eCommerce site.
@@ -20,13 +18,15 @@ Situational Examples:
 
 The intent of this extension was to be an annoyance to help get you (okay, me) off websites that you (*I) spend a tad too much time on.
 
-Available on 'Chromium-based browsers'* such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+**Installation**
 
-*Chromium-based Browser References:
-- https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
-- https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
+  - From within your favorite browser, navigate to the [Chrome Web Store](https://chrome.google.com/webstore/detail/too-much-time/okogpcjdmbagmocinoialgklbbjalbfn?hl=en&authuser=0) and click the "Add to Browser" button.
 
-### #2 - Instructions
+> Available for 'Chromium-based browsers'`*` such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+
+> Chrome Browser Note: Note that if you're installing this extension on the Chrome browser, after installing the extension, it may not be immediately visible on your toolbar. To be able to see your icon's timer count, you'll need to 'pin' the extension to the browser's toolbar by selecting the 'puzzle' icon on the toolbar.
+
+### #2 - Usage Instructions
 
 Steps to Use (after installing):
 
@@ -173,6 +173,10 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 - In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
   This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)
 
+- In the Vivaldi browser, the badge icon counter can sometimes turns orange.
+  This is not by design, but it will not happen when Dev Tools are open,
+  so isolating the issue, in just Vivaldi, wasn't worth the ROI.
+
 #### Open Source
 
 As with my first two Chrome extensions, the code is open source and available on GitHub.
@@ -185,29 +189,7 @@ If you have a bug or feature request, please feel free to [submit a new issue on
 
 ### Ancillary and Miscellaneous
 
-*Chrome Web Store Listing Information*
-
-Too-Much-Time is a simple browser extension that allows you to 'time' the time you spend on certain websites.
-
-> When the time you specify is up, you'll get an alert offering you the opportunity to stop or snooze.
-> To use, you'll simply provide a portion of the URL (domain) you'd like to time your time on.
-
-Situational Examples:
-  - If you find you've been spending a little more time than you would prefer on your favorite social networking site.
-  - Or perhaps you'd like to time your shopping on your favorite eCommerce site.
-  - Perhaps you'd like to time your efforts spent researching through an informational site.
-  - Or put in 'just enough' reading on a particular reading site before bed.
-
-The intent of this extension was to be an annoyance to help get you (okay, me) off websites that you (*I) spend a tad too much time on.
-
-Available on 'Chromium-based browsers'* such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
-
-> Chromium-based Browser References:
-
-  - https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
-  - https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
-
----
+*Chrome Web Store Permissions Information*
 
 > Storage
 
@@ -228,10 +210,9 @@ When a page is first hit*, the background script grabs the URL from the content 
 
 ---
 
-Other random app thoughts ...
+> `*`Chromium-based Browser References:
 
-> Mind your time on sites.
+  - https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
+  - https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
 
-> Pausing this will get on your nerves, but that's it's purpose.
-
-- Provides for unlimited 1 to 60-minute snoozes.
+---
