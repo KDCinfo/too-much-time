@@ -104,7 +104,8 @@ chrome.runtime.onInstalled.addListener(function() {
 
   chrome.windows.onFocusChanged.addListener( function(window) {
 
-    // if (showConsoleLogs) { console.log('[1b] onFocusChanged -> [inFocus] [ID_NONE == window]', inFocus, window); }
+    if (showConsoleLogs) { console.log('[1b1] onFocusChanged -> [inFocus] [window]', inFocus, window); }
+    if (showConsoleLogs) { console.log('[1b2] onFocusChanged -> [chrome.windows]', chrome.windows); }
 
     if (window == chrome.windows.WINDOW_ID_NONE) {
       inFocus = false; // Chrome does not have focus
@@ -123,11 +124,12 @@ chrome.runtime.onInstalled.addListener(function() {
       // });
     } else {
 
-      checkAndSetTimer('windows.onFocusChanged');
-      // 'onFocusChanged' is unreliable. Focusing instead on tmtConfig.lastMatch logic inside function.
-      // if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-      //   checkAndSetTimer('windows.onFocusChanged');
-      // }
+      // 'onFocusChanged' is unreliable.
+      // So focusing additionally on tmtConfig.lastMatch logic inside the checkAndSetTimer function.
+
+      if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
+        checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
+      }
 
       inFocus = true;
     }
@@ -288,7 +290,8 @@ function createTimer(tmtItem) { // async / returns a Promise
     if (tmtItem.active) {
       if (isGood('chrome') && isGood('chrome.alarms')) {
         try {
-          chrome.browserAction.setBadgeText({text: badgeWatchText });
+          // chrome.browserAction.setBadgeText({text: badgeWatchText });
+          setBadge(badgeWatchColor, badgeWatchText);
           chrome.alarms.create(alarmId, {delayInMinutes: tmtItem.delay, periodInMinutes: tmtItem.snooze});
           resolve(alarmId);
         } catch(e) {
@@ -313,7 +316,8 @@ function deleteTimer(timeId) {
       try {
         chrome.alarms.clear(alarmId, (wasCleared) => {
           if (wasCleared) {
-            chrome.browserAction.setBadgeText({text: '' });
+            // chrome.browserAction.setBadgeText({text: '' });
+            setBadge(badgeSleepColor, '');
           }
           resolve(wasCleared); // wasCleared: true|false
         });
@@ -333,7 +337,8 @@ function deleteAllTimers() {
       try {
         chrome.alarms.clearAll((wasCleared) => {
           if (wasCleared) {
-            chrome.browserAction.setBadgeText({text: '' });
+            // chrome.browserAction.setBadgeText({text: '' });
+            setBadge(badgeSleepColor, '');
           }
           resolve(wasCleared); // wasCleared: true|false
         });
@@ -438,34 +443,40 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
   //
   // console.log(alarm); // {name: "tmt-0", periodInMinutes: 1, scheduledTime: 1593041722115.426}
   //
-  chrome.browserAction.getBadgeText({}, function(result) {
 
-    var newerCount = (
-            typeof(result) === 'undefined' || isNaN(parseInt(result, 10))
-          ) ? 0 : parseInt(result, 10);
+  if (confirm('Stop the madness!!')) {
 
-    if (confirm('Stop the madness!!')) {
+    deleteTimer(alarm.name).then(response => {
 
-      deleteTimer(alarm.name).then(response => {
+      if (response) { // Magical fix for queued up confirm dialogs causing mayhem.
+        nextTab();    // Different approach (from trying to just create an empty [about:blank] tab).
+      }
+    });
 
-        if (response) { // Magical fix for queued up confirm dialogs causing mayhem.
-          nextTab();    // Different approach (from trying to just create an empty [about:blank] tab).
-        }
-      });
+    // var newURL = "about:blank"; // If you had multiple confirm dialogs piled up, each "OK" click would open a new 'about:blank' page.
+    // chrome.tabs.create({ url: newURL });
+    // Check if about:blank is already open .tabs currentWindow: true
 
-      // var newURL = "about:blank"; // If you had multiple confirm dialogs piled up, each "OK" click would open a new 'about:blank' page.
-      // chrome.tabs.create({ url: newURL });
-      // Check if about:blank is already open .tabs currentWindow: true
+  } else {
 
-    } else {
+    inFocus = false;
+
+    chrome.browserAction.getBadgeText({}, function(result) {
+
+      var newerCount = (
+              typeof(result) === 'undefined' || isNaN(parseInt(result, 10))
+            ) ? 0 : parseInt(result, 10);
+
       newerCount++;
 
       // *** If you "miss" clicking cancel on three or more confirms,
       // this variable stops counting after the first two increments.
       //
-      chrome.browserAction.setBadgeText({text: newerCount.toString() });
-    }
-  });
+      // chrome.browserAction.setBadgeText({text: newerCount.toString() });
+      setBadge(badgeWatchColor, newerCount.toString());
+    });
+  }
+  if (showConsoleLogs) { console.log('What happens after the madness stops??? This is supposed to be the end of the road.'); }
 });
 
 //

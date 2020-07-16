@@ -165,12 +165,9 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
   However! I'm actually hoping to never see the issue again as I've applied numerous proactive fixes. <code>:)</code>
 
-- In the Vivaldi browser, alerts do not work. You will only see the badge icon counter increment.
-  This is unfortunate being this is the browser I use to peruse Twitter. @TODO: :)
+- Some Chromium-based browsers (e.g. Vivaldi) do not support the use of (alert|confirm) dialog boxes when sent from an extension's background script. @TODO: Notifications appear to be the most viable alternative.
 
-- In the Vivaldi browser, the badge icon counter can sometimes turns orange.
-  This is not by design, but it will not happen when Dev Tools are open,
-  so isolating the issue, in just Vivaldi, wasn't worth the ROI.
+This in mind, in some browsers, the confirm alerts do not work: You will only see the badge icon counter increment. This is unfortunate being Vivaldi is the browser I use to peruse Twitter. @TODO: :)
 
 #### Open Source
 
@@ -202,6 +199,19 @@ Detection of switching between tabs and other tab activity allows storage to be 
 
 When a page is first hit*, the background script grabs the URL from the content script. A user has the ability to match any URL they visit. And for any matched page, an alarm will be set for that matched host.
 *On initial page load, for `onUpdated`: `changeInfo.url` wasn't available, so a `sendMessage` is sent to the content script requesting the `location.href` be sent back for matching. Otherwise, the URL is retrieved from: `chrome.tabs.query({active: true, currentWindow: true}, function(tabs) { // tabs[0].url }`
+
+### Version History
+
+> 0.0.1 - 0.0.7
+
+- Initial launch: Versions were for manifest and Chrome store configuration adjustments.
+
+> 0.0.8
+
+- Fixed major issue with timer resetting when browser regained focus from another app; both for 'already open' and 'new' timed pages.
+  - A detailed breakdown for these two issues can be found on [Google Groups](https://groups.google.com/a/chromium.org/g/chromium-extensions/c/2Qr1aFfWoj4).
+- Fixed issue with some browsers not reapplying the badge color; leaving it on the default, orange.
+- Turned off background console logs (oops).
 
 ---
 
