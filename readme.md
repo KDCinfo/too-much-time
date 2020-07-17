@@ -213,6 +213,20 @@ When a page is first hit*, the background script grabs the URL from the content 
 - Fixed issue with some browsers not reapplying the badge color; leaving it on the default, orange.
 - Turned off background console logs (oops).
 
+> 0.0.9 - 2020-07-16
+
+- Previous fix turned out to be more of a band-aid: Had to apply a splint.
+
+  After posting in the [Chromium Extensions](https://groups.google.com/a/chromium.org/g/chromium-extensions/c/2Qr1aFfWoj4) Google Group (per ^^^ above) about the previous issues not being present when the Background Page DevTools are open, I learned I needed to understand how persistence works with Background Pages.
+
+  That one fundamental observation allowed me to see that both the `inFocus` and `lastMatch` variables were merely temporary, as I was attempting to set these as global variables in a script that doesn't hold state.
+
+  Ergo, unless `persistence` is set to `true` in the manifest, variables defined in the Background Script cannot be 'global', and setting persistence to true is not encouraged (unless using the `webRequest` API).
+
+  One approach for storing state accessible to the Background Script---being there are only two variables used in limited fashion---is to use HTML5's `window.localStorage`. Once applied, it also appeared to fix a newfound issue---simply refreshing the page was also resetting the timer.
+
+  I'm hopeful this fix is a keeper. :-)
+
 ---
 
 > `*`Chromium-based Browser References:

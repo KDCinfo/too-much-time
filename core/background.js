@@ -17,23 +17,33 @@ let showConsoleLogs = false;
 
 if (showConsoleLogs) { console.clear(); }
 
-const arrayToMatchFromStorage = [], // ['twitter.com', '//google.com', '//www.google.com']
-      mapFromStorage = new Map([]),
-      tmtConfig = {lastMatch: ''};
+  const arrayToMatchFromStorage = [], // ['twitter.com', '//google.com', '//www.google.com']
+        mapFromStorage = new Map([]);
 
-      // mapFromStorage = new Map([
-      //   ['twitter.com', {id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts'}],
-      //   ['//google.com', {id: 1, url: '//google.com', active: 1, delay: 2, snooze: 2, alarmType: 'none'}],
-      //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
-      // ]);
+        // mapFromStorage = new Map([
+        //   ['twitter.com', {id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts'}],
+        //   ['//google.com', {id: 1, url: '//google.com', active: 1, delay: 2, snooze: 2, alarmType: 'none'}],
+        //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
+        // ]);
 
-const badgeWatchColor = [10, 10, 240, 255],
-      badgeWatchText = 'O_O',
-      badgeSleepColor = [0, 220, 0, 255],
-      // badgeSleepText = '~.~';
-      badgeSleepText = '';
+  const badgeWatchColor = [10, 10, 240, 255],
+        badgeWatchText = 'O_O',
+        badgeSleepColor = [0, 220, 0, 255],
+        // badgeSleepText = '~.~';
+        badgeSleepText = '';
 
-var inFocus = true; // Global boolean to keep track of window state.
+  var inFocus = true, // Global boolean to keep track of window state.
+      lastMatch = '';
+
+  try {
+    if ('localStorage' in window && window['localStorage'] !== null) {
+      localStorage["inFocus"] = 'true'; // Chrome does not have focus
+      localStorage["lastMatch"] = ''; // Chrome does not have focus
+    }
+  } catch (e) {
+    inFocus = true; // Chrome does not have focus
+    lastMatch = '';
+  }
 
 chrome.runtime.onInstalled.addListener(function() {
 
@@ -107,31 +117,52 @@ chrome.runtime.onInstalled.addListener(function() {
     if (showConsoleLogs) { console.log('[1b1] onFocusChanged -> [inFocus] [window]', inFocus, window); }
     if (showConsoleLogs) { console.log('[1b2] onFocusChanged -> [chrome.windows]', chrome.windows); }
 
-    if (window == chrome.windows.WINDOW_ID_NONE) {
-      inFocus = false; // Chrome does not have focus
+    // Cannot try to stop timer onFocusChanged because it doesn't always
+    // fire as expected. And in doing this, the timer stops when opening
+    // the popup, and sometimes when opening the right-click context menu.
 
-      // Cannot try to stop timer onFocusChanged because it doesn't always
-      // fire as expected. And in doing this, the timer stops when opening
-      // the popup, and sometimes when opening the right-click context menu.
+    // In other cases, 'onFocusChanged' IS NEVER HIT.
+    //
+    //   So unreliable!! (...or maybe just misunderstood. Misnomer perhaps?)
+    //
+    // deleteAllTimers().then(resp => {
+    //   lastMatch = '';
+    //   setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
+    // });
 
-      // In other cases, 'onFocusChanged' IS NEVER HIT.
-      //
-      //   So unreliable!! (...or maybe just misunderstood. Misnomer perhaps?)
-      //
-      // deleteAllTimers().then(resp => {
-      //   tmtConfig.lastMatch = '';
-      //   setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
-      // });
-    } else {
+    // I don't understand 'onFocusChanged' deep enough for it to be reliable.
+    // So focusing additionally on lastMatch logic inside the checkAndSetTimer function.
 
-      // 'onFocusChanged' is unreliable.
-      // So focusing additionally on tmtConfig.lastMatch logic inside the checkAndSetTimer function.
-
-      if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-        checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
+    try {
+      // return 'localStorage' in window && window['localStorage'] !== null;
+      if ('localStorage' in window && window['localStorage'] !== null) {
+        if (window == chrome.windows.WINDOW_ID_NONE) {
+          localStorage["inFocus"] = 'false'; // Chrome does not have focus
+        } else {
+          if (JSON.parse(localStorage["inFocus"])) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
+            checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
+          }
+          localStorage["inFocus"] = 'true';
+        }
+      } else {
+        if (window == chrome.windows.WINDOW_ID_NONE) {
+          inFocus = false; // Chrome does not have focus
+        } else {
+          if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
+            checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
+          }
+          inFocus = true;
+        }
       }
-
-      inFocus = true;
+    } catch (e) {
+      if (window == chrome.windows.WINDOW_ID_NONE) {
+        inFocus = false; // Chrome does not have focus
+      } else {
+        if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
+          checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
+        }
+        inFocus = true;
+      }
     }
   });
 
@@ -163,15 +194,30 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
     let urlItem = validateUrl(request.url);
     //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-    if (urlItem === false || urlItem.title !== tmtConfig.lastMatch) {
+    let thisMatch = lastMatch;
+    try {
+      if ('localStorage' in window && window['localStorage'] !== null) {
+        thisMatch = localStorage["lastMatch"];
+      }
+    } catch (e) {
+      thisMatch = lastMatch;
+    }
+
+    if (urlItem === false || urlItem.title !== thisMatch) {
 
       deleteAllTimers().then(resp => {
         if (urlItem !== false) {
 
-          tmtConfig.lastMatch = urlItem.title;
+          lastMatch = urlItem.title;
+          try {
+            if ('localStorage' in window && window['localStorage'] !== null) {
+              localStorage["lastMatch"] = urlItem.title;
+            }
+          } catch (e) {
+            lastMatch = urlItem.title;
+          }
 
           if (urlItem.active) {
-
             setBadge(badgeWatchColor, badgeWatchText);
             // setBadge(badgeWatchColor, urlItem.delay + '_' + urlItem.snooze);
             // ^^^ Badge only allows 4 chars.     ^^^ Delay and snooze ^^^ can both be 2 digits.
@@ -182,7 +228,14 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
             setBadge(badgeSleepColor, badgeSleepText); // Matched, but Inactive. @TODO: Maybe change badge text.
           }
         } else {
-          tmtConfig.lastMatch = '';
+          lastMatch = '';
+          try {
+            if ('localStorage' in window && window['localStorage'] !== null) {
+              localStorage["lastMatch"] = '';
+            }
+          } catch (e) {
+            lastMatch = '';
+          }
           setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
         }
         sendResponse({urlItem: urlItem});
@@ -204,7 +257,16 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
         syncDataMsg = false;
       } else {
         syncDataMsg = "Good 'post-storage.set' live data update.";
-        tmtConfig.lastMatch = ''; // We're in the popup; A save terminates the lastMatch protocol.
+
+        lastMatch = ''; // We're in the popup; A save terminates the lastMatch protocol.
+        try {
+          if ('localStorage' in window && window['localStorage'] !== null) {
+            localStorage["lastMatch"] = '';
+          }
+        } catch (e) {
+          lastMatch = '';
+        }
+
         checkAndSetTimer('request.action === formSave');
       }
       sendResponse({status: syncDataMsg});
@@ -374,15 +436,32 @@ function checkAndSetTimer(src = '') {
         let urlItem = validateUrl(currentUrl);
         //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-        if (urlItem === false || urlItem.title !== tmtConfig.lastMatch) { // .title .url
+        let thisMatch = lastMatch;
+        try {
+          if ('localStorage' in window && window['localStorage'] !== null) {
+            thisMatch = localStorage["lastMatch"];
+          }
+        } catch (err) {
+          thisMatch = lastMatch;
+        }
+
+        // if (urlItem === false || urlItem.title !== lastMatch) { // .title .url
+        if (urlItem === false || urlItem.title !== thisMatch) { // .title .url
 
           if (showConsoleLogs) { console.log('[2aa] New Page; or Not Old Page; Delete Timer; Try to create'); }
-          if (showConsoleLogs) { console.log('[2ab]', currentUrl, urlItem, tmtConfig); }
+          if (showConsoleLogs) { console.log('[2ab]', currentUrl, urlItem, lastMatch); }
 
           deleteAllTimers().then(resp => {
             if (urlItem !== false) {
 
-              tmtConfig.lastMatch = urlItem.title;
+              lastMatch = urlItem.title;
+              try {
+                if ('localStorage' in window && window['localStorage'] !== null) {
+                  localStorage["lastMatch"] = urlItem.title;
+                }
+              } catch (e) {
+                lastMatch = urlItem.title;
+              }
 
               if (urlItem.active) {
 
@@ -399,19 +478,33 @@ function checkAndSetTimer(src = '') {
                 if (showConsoleLogs) { console.log('[2c] Matched; Inactive'); }
               }
             } else {
-              tmtConfig.lastMatch = '';
+              lastMatch = '';
+              try {
+                if ('localStorage' in window && window['localStorage'] !== null) {
+                  localStorage["lastMatch"] = '';
+                }
+              } catch (e) {
+                lastMatch = '';
+              }
               setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
               if (showConsoleLogs) { console.log('[2d] No match; Not timed'); }
             }
           });
         } else {
-          if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, tmtConfig); }
+          if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, lastMatch); }
           // We're on the same matching URL; let the timer run; do nothing.
         }
       } else {
         if (showConsoleLogs) { console.log('[2f] Chrome lost focus. Delete timer; clear lastMatch and badge.'); }
         deleteAllTimers().then(resp => {
-          tmtConfig.lastMatch = '';
+          lastMatch = '';
+          try {
+            if ('localStorage' in window && window['localStorage'] !== null) {
+              localStorage["lastMatch"] = '';
+            }
+          } catch (e) {
+            lastMatch = '';
+          }
           setBadge(badgeSleepColor, badgeSleepText);   // No tabs; Chrome no longer has focus.
         });
       }
@@ -460,6 +553,14 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
   } else {
 
     inFocus = false;
+
+    try {
+      if ('localStorage' in window && window['localStorage'] !== null) {
+        localStorage["inFocus"] = 'false'; // Chrome does not have focus
+      }
+    } catch (e) {
+      inFocus = false; // Chrome does not have focus
+    }
 
     chrome.browserAction.getBadgeText({}, function(result) {
 
