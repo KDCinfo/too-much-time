@@ -2,7 +2,9 @@
 
 > A productivity-based browser extension.
 
-The information provided herein is the same information available within the extension's 'Informational' pop-up panel.
+The information provided on this page is the TMT project's source of truth.
+
+In addition to providing the same information available within the extension's 'Informational' pop-up panel, it also provides a list of known issues, version history, and @TODOs, making it the project's most inclusive resource.
 
 ---
 
@@ -14,19 +16,25 @@ The information provided herein is the same information available within the ext
 
 Situational Examples:
   - If you find you've been spending a little more time than you would prefer on your favorite social networking site.
-  - Or perhaps you'd like to time your shopping on your favorite eCommerce site.
-  - Perhaps you'd like to time your efforts spent researching through an informational site.
-  - Or put in 'just enough' reading on a particular reading site before bed.
+  - Or perhaps you'd like to time your shopping on your favorite shopping site.
 
 The intent of this extension was to be an annoyance to help get you (okay, me) off websites that you (*I) spend a tad too much time on.
 
 ### #2 - Installation
 
-  - From within your favorite browser, navigate to the [Chrome Web Store](https://chrome.google.com/webstore/detail/too-much-time/okogpcjdmbagmocinoialgklbbjalbfn?hl=en&authuser=0) and click the "Add to Browser" button.
+  - From within your favorite browser^, navigate to the [Chrome Web Store](https://chrome.google.com/webstore/detail/too-much-time/okogpcjdmbagmocinoialgklbbjalbfn?hl=en&authuser=0) and click the "Add to Browser" button.
 
-**Chrome Browser Note:** As of July 2020, after installing a browser extension, the Chrome Browser **hides the extension by default**. In order to see the badge counter and badge colors on the extension's icon, after installing, you will need to open the Chrome extension panel (click the puzzle piece icon on the toolbar), find the TMT extension, and click the pin icon.
+**Chrome Browser Note:** As of July 2020, after installing a browser extension, the Chrome Browser **hides the extension icon by default**.
 
-> Although there can be some nuances (and bugs), browser extensions available from the Chrome Web Store are also available for other [https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active](Chromium-based browsers) such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+  - In order to see the badge counter and badge colors on the extension's icon in the Chrome browser, after installing, you will need to:
+
+  1. Open the Chrome extension panel (click the puzzle piece icon on the toolbar),
+  2. Find the TMT extension, and
+  3. Click the pin icon.
+
+**^Browser Compatibility:** Although there can be some nuances (and bugs), browser extensions available from the
+Chrome Web Store are also available for other [https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active](Chromium-based browsers)
+such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
 
 ### #3 - Usage Instructions
 
@@ -167,17 +175,17 @@ This in mind, in some browsers, the confirm alerts do not work: You will only se
 
   *To try to fix the issue*; try going to another tab, and then returning to the tab expected to start a timer.
 
-#### Open Source
+### #9 - Contact / Support
+
+If you have a bug or feature request, please feel free to [submit a new issue on GitHub](https://github.com/KDCinfo/too-much-time/issues). Feel free to [submit Pull Requests](https://github.com/KDCinfo/too-much-time/pulls) for consideration as well.If you need to contact me directly, you can use [the contact form on my portfolio site](https://kdcinfo.com/?contact).
+
+### #10 - Open Source
 
 As with my first two Chrome extensions, the code is open source and available on GitHub.
 If you come across a bug, feel free to look at the code, and see if you can find a fix.
 I'm also open to Pull Requests and possibly even contributors.
 
-### #9 - Contact / Support
-
-If you have a bug or feature request, please feel free to [submit a new issue on GitHub](https://github.com/KDCinfo/too-much-time/issues). Feel free to [submit Pull Requests](https://github.com/KDCinfo/too-much-time/pulls) for consideration as well.If you need to contact me directly, you can use [the contact form on my portfolio site](https://kdcinfo.com/?contact).
-
-### Ancillary and Miscellaneous
+### #11 - Ancillary and Miscellaneous
 
 *Chrome Web Store Permissions Information*
 
@@ -198,7 +206,7 @@ Detection of switching between tabs and other tab activity allows storage to be 
 When a page is first hit*, the background script grabs the URL from the content script. A user has the ability to match any URL they visit. And for any matched page, an alarm will be set for that matched host.
 *On initial page load, for `onUpdated`: `changeInfo.url` wasn't available, so a `sendMessage` is sent to the content script requesting the `location.href` be sent back for matching. Otherwise, the URL is retrieved from: `chrome.tabs.query({active: true, currentWindow: true}, function(tabs) { // tabs[0].url }`
 
-### Version History
+### #12 - Version History
 
 > 0.0.1 - 0.0.7
 
@@ -237,7 +245,7 @@ When a page is first hit*, the background script grabs the URL from the content 
 
 - The TMT [https://kdcinfo.com/app/tmt/](landing page) was generic'd down. Removed a triple copy of these FAQs---now just providing an overview and a link to the Chrome Store or back here to GitHub.
 
-### @TODO:
+### #13 - @TODO:
 
 - Make it optional to stop the timer when the browser loses focus.
 
@@ -252,7 +260,7 @@ Optional items would be done in the extension's pop-up page.
   - I believe the localStorage differs between pop-up and background scripts.
   - Maybe can use `sync`, but might be overboard. Messaging isn't difficult; just might want to better document the key entry points.
 
----
+### #14 - References
 
 > `*`Chromium-based Browser References:
 
