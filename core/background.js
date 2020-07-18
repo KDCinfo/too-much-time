@@ -15,34 +15,64 @@ chrome.browserAction.setBadgeBackgroundColor({color: 'orange'});
 let showConsoleLogs = false;
 // let showConsoleLogs = true;
 
+// 'showConsoleLogs' is the only global variable. The Background Page DevTools
+// needs to be open to even see console logs, thus, so long as the BG DevTools
+// is open, global scope is persisted --- It's sole purpose is for BG DevTools.
+
 if (showConsoleLogs) { console.clear(); }
 
-  const arrayToMatchFromStorage = [], // ['twitter.com', '//google.com', '//www.google.com']
-        mapFromStorage = new Map([]);
+// These variables will be consumed by localStorage.
 
-        // mapFromStorage = new Map([
-        //   ['twitter.com', {id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts'}],
-        //   ['//google.com', {id: 1, url: '//google.com', active: 1, delay: 2, snooze: 2, alarmType: 'none'}],
-        //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
-        // ]);
+  let arrayToMatchFromStorage = [],
+      mapFromStorage = new Map([]),
+      badgeWatchColor = [10, 10, 240, 255],
+      badgeAlertColor = [210, 10, 40, 255],
+      badgeWatchText = 'O_O', // '~.~'
+      badgeSleepColor = [0, 220, 0, 255],
+      badgeSleepText = '',
+      lastMatch = '',
+      inFocus = true;
 
-  const badgeWatchColor = [10, 10, 240, 255],
-        badgeWatchText = 'O_O',
-        badgeSleepColor = [0, 220, 0, 255],
-        // badgeSleepText = '~.~';
-        badgeSleepText = '';
+  if (localStorage.getItem('arrayToMatchFromStorage') === null) {
+    localStorage.setItem('arrayToMatchFromStorage', JSON.stringify(arrayToMatchFromStorage));
+    // ['twitter.com', '//google.com', '//www.google.com']
+  }
 
-  var inFocus = true, // Global boolean to keep track of window state.
-      lastMatch = '';
+  if (localStorage.getItem('mapFromStorage') === null) {
+    localStorage.setItem('mapFromStorage', JSON.stringify([...mapFromStorage]));
+    // mapFromStorage = new Map([
+    //   ['twitter.com', {id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts'}],
+    //   ['//google.com', {id: 1, url: '//google.com', active: 1, delay: 2, snooze: 2, alarmType: 'none'}],
+    //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
+    // ]);
+  }
 
-  try {
-    if ('localStorage' in window && window['localStorage'] !== null) {
-      localStorage["inFocus"] = 'true'; // Chrome does not have focus
-      localStorage["lastMatch"] = ''; // Chrome does not have focus
-    }
-  } catch (e) {
-    inFocus = true; // Chrome does not have focus
-    lastMatch = '';
+  if (localStorage.getItem('inFocus') === null) {
+    localStorage.setItem('inFocus', JSON.stringify(inFocus));
+  }
+
+  if (localStorage.getItem('lastMatch') === null) {
+    localStorage.setItem('lastMatch', lastMatch);
+  }
+
+  if (localStorage.getItem('badgeWatchColor') === null) {
+    localStorage.setItem('badgeWatchColor', JSON.stringify(badgeWatchColor));
+  }
+
+  if (localStorage.getItem('badgeAlertColor') === null) {
+    localStorage.setItem('badgeAlertColor', JSON.stringify(badgeAlertColor));
+  }
+
+  if (localStorage.getItem('badgeWatchText') === null) {
+    localStorage.setItem('badgeWatchText', badgeWatchText);
+  }
+
+  if (localStorage.getItem('badgeSleepColor') === null) {
+    localStorage.setItem('badgeSleepColor', JSON.stringify(badgeSleepColor));
+  }
+
+  if (localStorage.getItem('badgeSleepText') === null) {
+    localStorage.setItem('badgeSleepText', badgeSleepText);
   }
 
 chrome.runtime.onInstalled.addListener(function() {
@@ -114,7 +144,7 @@ chrome.runtime.onInstalled.addListener(function() {
 
   chrome.windows.onFocusChanged.addListener( function(window) {
 
-    if (showConsoleLogs) { console.log('[1b1] onFocusChanged -> [inFocus] [window]', inFocus, window); }
+    if (showConsoleLogs) { console.log('[1b1] onFocusChanged -> [thisInFocus] [window]', localStorage.getItem('inFocus'), window); }
     if (showConsoleLogs) { console.log('[1b2] onFocusChanged -> [chrome.windows]', chrome.windows); }
 
     // Cannot try to stop timer onFocusChanged because it doesn't always
@@ -133,36 +163,17 @@ chrome.runtime.onInstalled.addListener(function() {
     // I don't understand 'onFocusChanged' deep enough for it to be reliable.
     // So focusing additionally on lastMatch logic inside the checkAndSetTimer function.
 
-    try {
-      // return 'localStorage' in window && window['localStorage'] !== null;
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        if (window == chrome.windows.WINDOW_ID_NONE) {
-          localStorage["inFocus"] = 'false'; // Chrome does not have focus
-        } else {
-          if (JSON.parse(localStorage["inFocus"])) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-            checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
-          }
-          localStorage["inFocus"] = 'true';
-        }
-      } else {
-        if (window == chrome.windows.WINDOW_ID_NONE) {
-          inFocus = false; // Chrome does not have focus
-        } else {
-          if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-            checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
-          }
-          inFocus = true;
-        }
+    if (window == chrome.windows.WINDOW_ID_NONE) {
+      localStorage.setItem('inFocus', JSON.stringify(false)); // Chrome does not have focus
+
+      // @TODO: Make it optional to stop the timer at this point---when browser focus is lost.
+
+    } else {
+      // Magic Solution to not resetting the timer when the same tab is refocused !!!
+      if (JSON.parse(localStorage.getItem('inFocus'))) {
+        checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
       }
-    } catch (e) {
-      if (window == chrome.windows.WINDOW_ID_NONE) {
-        inFocus = false; // Chrome does not have focus
-      } else {
-        if (inFocus) { // Magic Solution to not resetting the timer when the same tab is refocused !!!
-          checkAndSetTimer('windows.onFocusChanged inside Else > If -> inFocus');
-        }
-        inFocus = true;
-      }
+      localStorage.setItem('inFocus', JSON.stringify(true));
     }
   });
 
@@ -192,33 +203,26 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
   if (request.action === 'checkURL') {
 
     let urlItem = validateUrl(request.url);
+
+    if (showConsoleLogs) { console.log('onMessage [checkURL]: ', request, sender, sendResponse); }
+    if (showConsoleLogs) { console.log('onMessage [checkURL] [urlItem]: ', urlItem); }
     //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-    let thisMatch = lastMatch;
-    try {
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        thisMatch = localStorage["lastMatch"];
-      }
-    } catch (e) {
-      thisMatch = lastMatch;
-    }
+    // lastMatch = urlItem.title;
 
-    if (urlItem === false || urlItem.title !== thisMatch) {
+    if (urlItem === false || urlItem.title !== localStorage.getItem('lastMatch')) {
 
       deleteAllTimers().then(resp => {
+
+        var badgeSleepColor = JSON.parse(localStorage.getItem('badgeSleepColor'));
+        var badgeSleepText = localStorage.getItem('badgeSleepText')
+
         if (urlItem !== false) {
 
-          lastMatch = urlItem.title;
-          try {
-            if ('localStorage' in window && window['localStorage'] !== null) {
-              localStorage["lastMatch"] = urlItem.title;
-            }
-          } catch (e) {
-            lastMatch = urlItem.title;
-          }
+          localStorage.setItem('lastMatch', urlItem.title);
 
           if (urlItem.active) {
-            setBadge(badgeWatchColor, badgeWatchText);
+            setBadge(JSON.parse(localStorage.getItem('badgeWatchColor')), localStorage.getItem('badgeWatchText'));
             // setBadge(badgeWatchColor, urlItem.delay + '_' + urlItem.snooze);
             // ^^^ Badge only allows 4 chars.     ^^^ Delay and snooze ^^^ can both be 2 digits.
             createTimer(urlItem).then(response => {
@@ -228,14 +232,8 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
             setBadge(badgeSleepColor, badgeSleepText); // Matched, but Inactive. @TODO: Maybe change badge text.
           }
         } else {
-          lastMatch = '';
-          try {
-            if ('localStorage' in window && window['localStorage'] !== null) {
-              localStorage["lastMatch"] = '';
-            }
-          } catch (e) {
-            lastMatch = '';
-          }
+          localStorage.setItem('lastMatch', '');
+
           setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
         }
         sendResponse({urlItem: urlItem});
@@ -258,14 +256,7 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
       } else {
         syncDataMsg = "Good 'post-storage.set' live data update.";
 
-        lastMatch = ''; // We're in the popup; A save terminates the lastMatch protocol.
-        try {
-          if ('localStorage' in window && window['localStorage'] !== null) {
-            localStorage["lastMatch"] = '';
-          }
-        } catch (e) {
-          lastMatch = '';
-        }
+        localStorage.setItem('lastMatch', ''); // We're in the popup; A save terminates the lastMatch protocol.
 
         checkAndSetTimer('request.action === formSave');
       }
@@ -316,11 +307,12 @@ function validateUrl(urlToCheck) {
   //   ['//www.google.com', {id: 2, url: '//google.com', active: 1, delay: 1, snooze: 1, alarmType: 'alerts'}]
   // ]);
 
-  if (showConsoleLogs) { console.log('|| arrayToMatchFromStorage | mapFromStorage ||'); }
-  if (showConsoleLogs) { console.log(arrayToMatchFromStorage, mapFromStorage); }
+  // if (showConsoleLogs) { console.log('|| arrayToMatchFromStorage | mapFromStorage ||'); }
+  // if (showConsoleLogs) { console.log(arrayToMatchFromStorage, mapFromStorage); }
   if (showConsoleLogs) { console.log('|| _______________________ | ______________ ||'); }
-  let foundItemUrl = arrayToMatchFromStorage.find(url => {
-    if (showConsoleLogs) { console.log('... ... find [url]', url); }
+
+  let foundItemUrl = JSON.parse(localStorage.getItem('arrayToMatchFromStorage')).find(url => {
+    if (showConsoleLogs) { console.log('... ... find [urlToCheck] [url]', urlToCheck, '[.includes]', url); }
     return urlToCheck.includes(url);
   });
 
@@ -330,7 +322,8 @@ function validateUrl(urlToCheck) {
 
     // ^^^ Brave returns: 'chrome' | Chrome, Opera, Vivaldi return: undefined
 
-    let foundItem = mapFromStorage.get(foundItemUrl);
+    let parsedMapFromStorage = new Map(JSON.parse(localStorage.getItem('mapFromStorage')));
+    let foundItem = parsedMapFromStorage.get(foundItemUrl);
     if (foundItemUrl) {
       return foundItem; // Item ID: 0, 1, 2...
     } else {
@@ -353,7 +346,7 @@ function createTimer(tmtItem) { // async / returns a Promise
       if (isGood('chrome') && isGood('chrome.alarms')) {
         try {
           // chrome.browserAction.setBadgeText({text: badgeWatchText });
-          setBadge(badgeWatchColor, badgeWatchText);
+          setBadge(JSON.parse(localStorage.getItem('badgeWatchColor')), localStorage.getItem('badgeWatchText'));
           chrome.alarms.create(alarmId, {delayInMinutes: tmtItem.delay, periodInMinutes: tmtItem.snooze});
           resolve(alarmId);
         } catch(e) {
@@ -379,7 +372,7 @@ function deleteTimer(timeId) {
         chrome.alarms.clear(alarmId, (wasCleared) => {
           if (wasCleared) {
             // chrome.browserAction.setBadgeText({text: '' });
-            setBadge(badgeSleepColor, '');
+            setBadge(JSON.parse(localStorage.getItem('badgeSleepColor')), '');
           }
           resolve(wasCleared); // wasCleared: true|false
         });
@@ -400,7 +393,7 @@ function deleteAllTimers() {
         chrome.alarms.clearAll((wasCleared) => {
           if (wasCleared) {
             // chrome.browserAction.setBadgeText({text: '' });
-            setBadge(badgeSleepColor, '');
+            setBadge(JSON.parse(localStorage.getItem('badgeSleepColor')), '');
           }
           resolve(wasCleared); // wasCleared: true|false
         });
@@ -428,6 +421,9 @@ function checkAndSetTimer(src = '') {
 
       if (showConsoleLogs) { console.log('[2_] ___: query tabs', tabs); }
 
+      var badgeSleepColor = JSON.parse(localStorage.getItem('badgeSleepColor'));
+      var badgeSleepText = localStorage.getItem('badgeSleepText');
+
       if (tabs.length > 0) {
 
         const currentUrl = tabs[0].url;
@@ -436,17 +432,7 @@ function checkAndSetTimer(src = '') {
         let urlItem = validateUrl(currentUrl);
         //  urlItem = false || { id: 0, url: '//twitter.com', active: 1, delay: 5, snooze: 2, alarmType: 'alerts' }
 
-        let thisMatch = lastMatch;
-        try {
-          if ('localStorage' in window && window['localStorage'] !== null) {
-            thisMatch = localStorage["lastMatch"];
-          }
-        } catch (err) {
-          thisMatch = lastMatch;
-        }
-
-        // if (urlItem === false || urlItem.title !== lastMatch) { // .title .url
-        if (urlItem === false || urlItem.title !== thisMatch) { // .title .url
+        if (urlItem === false || urlItem.title !== localStorage.getItem('lastMatch')) { // .title .url
 
           if (showConsoleLogs) { console.log('[2aa] New Page; or Not Old Page; Delete Timer; Try to create'); }
           if (showConsoleLogs) { console.log('[2ab]', currentUrl, urlItem, lastMatch); }
@@ -454,18 +440,11 @@ function checkAndSetTimer(src = '') {
           deleteAllTimers().then(resp => {
             if (urlItem !== false) {
 
-              lastMatch = urlItem.title;
-              try {
-                if ('localStorage' in window && window['localStorage'] !== null) {
-                  localStorage["lastMatch"] = urlItem.title;
-                }
-              } catch (e) {
-                lastMatch = urlItem.title;
-              }
+              localStorage.setItem('lastMatch', urlItem.title);
 
               if (urlItem.active) {
 
-                setBadge(badgeWatchColor, badgeWatchText);
+                setBadge(JSON.parse(localStorage.getItem('badgeWatchColor')), localStorage.getItem('badgeWatchText'));
                 // setBadge(badgeWatchColor, urlItem.delay + '_' + urlItem.snooze);
                 // ^^^ Badge only allows 4 chars.     ^^^ Delay and snooze ^^^ can both be 2 digits.
                 if (showConsoleLogs) { console.log('[2b] Matched; Active; Creating Timer'); }
@@ -474,38 +453,29 @@ function checkAndSetTimer(src = '') {
                 });
               } else {
 
-                setBadge(badgeSleepColor, badgeSleepText); // Matched, but Inactive. @TODO: Maybe change badge text.
+                // Matched, but Inactive. @TODO: Maybe change badge text.
+                setBadge(JSON.parse(localStorage.getItem('badgeSleepColor')), localStorage.getItem('badgeSleepText'));
                 if (showConsoleLogs) { console.log('[2c] Matched; Inactive'); }
               }
             } else {
-              lastMatch = '';
-              try {
-                if ('localStorage' in window && window['localStorage'] !== null) {
-                  localStorage["lastMatch"] = '';
-                }
-              } catch (e) {
-                lastMatch = '';
-              }
-              setBadge(badgeSleepColor, badgeSleepText);   // No match; Not timed. Shows the default icon.
+              localStorage.setItem('lastMatch', '');
+
+              // No match; Not timed. Shows the default icon.
+              setBadge(JSON.parse(localStorage.getItem('badgeSleepColor')), localStorage.getItem('badgeSleepText'));
               if (showConsoleLogs) { console.log('[2d] No match; Not timed'); }
             }
           });
         } else {
-          if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, lastMatch); }
+          if (showConsoleLogs) { console.log('[2e] urlItem: false || url !==', urlItem, localStorage.getItem('lastMatch')); }
           // We're on the same matching URL; let the timer run; do nothing.
         }
       } else {
         if (showConsoleLogs) { console.log('[2f] Chrome lost focus. Delete timer; clear lastMatch and badge.'); }
         deleteAllTimers().then(resp => {
-          lastMatch = '';
-          try {
-            if ('localStorage' in window && window['localStorage'] !== null) {
-              localStorage["lastMatch"] = '';
-            }
-          } catch (e) {
-            lastMatch = '';
-          }
-          setBadge(badgeSleepColor, badgeSleepText);   // No tabs; Chrome no longer has focus.
+          localStorage.setItem('lastMatch', '');
+
+          // No tabs; Chrome no longer has focus.
+          setBadge(JSON.parse(localStorage.getItem('badgeSleepColor')), localStorage.getItem('badgeSleepText'));
         });
       }
     });
@@ -552,19 +522,12 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 
   } else {
 
-    inFocus = false;
-
-    try {
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        localStorage["inFocus"] = 'false'; // Chrome does not have focus
-      }
-    } catch (e) {
-      inFocus = false; // Chrome does not have focus
-    }
+    localStorage.setItem('inFocus', JSON.stringify(false));
+    // Clicking the confirm dialog buttons changes browser focus; don't rerun checkAndSetTimer().
 
     chrome.browserAction.getBadgeText({}, function(result) {
 
-      var newerCount = (
+      let newerCount = (
               typeof(result) === 'undefined' || isNaN(parseInt(result, 10))
             ) ? 0 : parseInt(result, 10);
 
@@ -574,7 +537,10 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
       // this variable stops counting after the first two increments.
       //
       // chrome.browserAction.setBadgeText({text: newerCount.toString() });
-      setBadge(badgeWatchColor, newerCount.toString());
+
+      setBadge(JSON.parse(localStorage.getItem('badgeAlertColor')), newerCount.toString());
+      //                                        badgeAlertColor = [210, 10, 40, 255],
+      //                                        badgeWatchColor = [10, 10, 240, 255],
     });
   }
   if (showConsoleLogs) { console.log('What happens after the madness stops??? This is supposed to be the end of the road.'); }
@@ -665,20 +631,24 @@ function syncData() {
         //       ]);
         //
 
-        mapFromStorage.clear();
-        arrayToMatchFromStorage.length = 0;
+        // let mapFromStorage = JSON.parse(localStorage.getItem('mapFromStorage'));
+        // mapFromStorage.clear();
+        // arrayToMatchFromStorage.length = 0;
+
+        let localMapFromStorage = new Map([]);
+        let localArrayToMatchFromStorage = [];
 
         if (!isEmpty(itemList.tmtList)) { // Only do anything if there is an `tmtList` object.
           itemList.tmtList.forEach( item => {
-            // let configObj = {};
-            // configObj = {...item};
 
-            mapFromStorage.set( item.title, item );
-            if (!arrayToMatchFromStorage.includes(item.title)) {
-              arrayToMatchFromStorage.push( item.title );
+            localMapFromStorage.set( item.title, item );
+            if (!localArrayToMatchFromStorage.includes(item.title)) {
+              localArrayToMatchFromStorage.push( item.title );
             }
           });
         }
+        localStorage.setItem('arrayToMatchFromStorage', JSON.stringify(localArrayToMatchFromStorage));
+        localStorage.setItem('mapFromStorage', JSON.stringify([...localMapFromStorage]));
 
         // checkAndSetTimer('sync.get');
         resolve('Successful data sync.');
@@ -741,3 +711,81 @@ syncData('[background] inline load - EOF').then(syncResponse => {
 
   // if (syncResponse === false) { console.error('Error: Sync Initialization'); }
 }); // Initialize extension data with storage.
+
+// [2020-07] @TODO: Can remove all these notes at a later date
+//                  when localStorage is delved into deeper (or not).
+
+// Was considering splitting out individual localStorage existence checks, but more
+// than just two of these 'global' variables need localStorage (they all do). So instead,
+// considered using a factory or custom functions for each 'check and set' usage. But that
+// seems unwieldly for a Chrome Extension that will see all of maybe 10 users---maybe. Will
+// add a note to FAQ this extension requires the browser have access to localStorage data.
+
+  // try {
+  //   if ('localStorage' in window && window['localStorage'] !== null) {
+  //     localStorage["showConsoleLogs"] = 'true';
+  //   }
+  // } catch (e) {
+  //   showConsoleLogs = true;
+  // }
+
+  // try {
+  //   if ('localStorage' in window && window['localStorage'] !== null) {
+  //     localStorage["inFocus"] = 'true';
+  //     localStorage["lastMatch"] = '';
+  //   }
+  // } catch (e) {
+  //   inFocus = true;
+  //   lastMatch = '';
+  // }
+
+  // setInFocus('inFocus', inFocus, true);
+  // setLastMatch('lastMatch', lastMatch, '');
+
+  // function setInFocus(set1str, set1var, set1val) {
+  //   try {
+  //     if ('localStorage' in window && window['localStorage'] !== null) {
+  //       localStorage[set1str] = set1val.toString(); // set1val = true|false
+  //     }
+  //   } catch (e) {
+  //     set1var = set1val;
+  //   }
+  // }
+
+  // function setLastMatch(set1str, set1var, set1val) {
+  //   try {
+  //     if ('localStorage' in window && window['localStorage'] !== null) {
+  //       localStorage[set1str] = set1val; // set1val = ''|'...'
+  //     }
+  //   } catch (e) {
+  //     set1var = set1val;
+  //   }
+  // }
+
+// [2020-07] ... localStorage Notes
+
+  // https://stackoverflow.com/questions/28918232/how-do-i-persist-a-es6-map-in-localstorage-or-elsewhere
+
+     // // localStorage.mapFromStorage = JSON.stringify(Array.from(mapFromStorage.entries()));
+     // localStorage.mapFromStorage = JSON.stringify([...mapFromStorage])
+
+     // mapFromStorage = new Map(JSON.parse(localStorage.mapFromStorage));
+
+// [2020-07] ... continued
+
+  // Was going with square bracket notation, but due to inconsistencies in comparator operators,
+  // going to stick with the prototype getItem and setItem methods.
+
+  // localStorage comparison operator discrepancies (where 'test33' could also be 'propertyDoesNotExist'):
+
+  //   true* => localStorage.getItem("test33") === null
+  //   false => localStorage.getItem("test33") === undefined
+
+  //   false => localStorage.test33 === null
+  //   true  => localStorage.test33 === undefined
+
+  //   false => localStorage["test33"] === null
+  //   true  => localStorage["test33"] === undefined
+
+  // localStorage["inFocus"] = 'true'; // I try to use double quotes in square bracket notation.
+  // localStorage["lastMatch"] = '';

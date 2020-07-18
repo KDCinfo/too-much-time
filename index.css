@@ -48,6 +48,10 @@ body {
   width: 98%;
 }
 
+.hidden {
+  display: none;
+}
+
 #ContainerApp {
   height: 100%;
   margin: 0 auto;
@@ -85,7 +89,7 @@ body {
         /*color: rgb(40, 150, 255);*/
         color: var(--the-new-blue);
         display: block;
-        font-size: 14px;
+        font-size: 18px;
         margin: 1em 0 0 1em;
         max-width: 510px;
         min-height: 45px;
@@ -98,6 +102,7 @@ body {
       flex: 3 1 auto;
         border-bottom: 1px solid var(--expires-table-border);
         border-top: 1px solid var(--expires-table-border);
+      font-size: 16px;
       margin: 0.7em 0;
       max-height: 70vh;
       min-height: 214px;
@@ -105,6 +110,10 @@ body {
       padding: 0.2em 0 0;
       position: relative;
       width: 100%;
+    }
+    .faq-start {
+      font-size: 18px;
+      line-height: 2;
     }
 
 h1 {
@@ -174,6 +183,7 @@ a:hover {
         }
 
       .footer-faq-ul {
+        min-height: 151px;
         padding: 1em 1em 3em;
         white-space: normal;
       }

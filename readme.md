@@ -1,6 +1,8 @@
 ## Too-Much-Time
 
-> The information provided herein is the same information available within the extension's 'Informational' pop-up panel.
+> A productivity-based browser extension.
+
+The information provided herein is the same information available within the extension's 'Informational' pop-up panel.
 
 ---
 
@@ -22,9 +24,9 @@ The intent of this extension was to be an annoyance to help get you (okay, me) o
 
   - From within your favorite browser, navigate to the [Chrome Web Store](https://chrome.google.com/webstore/detail/too-much-time/okogpcjdmbagmocinoialgklbbjalbfn?hl=en&authuser=0) and click the "Add to Browser" button.
 
-> Available for 'Chromium-based browsers'`*` such as Chrome, Brave, Microsoft Edge, Opera, Vivaldi, Comodo Dragon, etc.
+**Chrome Browser Note:** As of July 2020, after installing a browser extension, the Chrome Browser **hides the extension by default**. In order to see the badge counter and badge colors on the extension's icon, after installing, you will need to open the Chrome extension panel (click the puzzle piece icon on the toolbar), find the TMT extension, and click the pin icon.
 
-> **Chrome Browser Note:** If you're installing this extension on the Chrome browser, after installing the extension, it may not be immediately visible on your toolbar. To be able to see your icon's timer count, you'll need to 'pin' the extension to the browser's toolbar by selecting the 'puzzle' icon on the toolbar.
+> Although there can be some nuances (and bugs), browser extensions available from the Chrome Web Store are also available for other [https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active](Chromium-based browsers) such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
 
 ### #3 - Usage Instructions
 
@@ -151,23 +153,19 @@ Due to the URL info list being stored inside your browser, it is strongly advise
 
 ### #8 - Known Issues
 
-- If you 'miss' clicking OK or Cancel on three or more confirms,
-  the extension's icon stops counting after the first two increments.
-  If your last click was Cancel, the next Cancel will increment the counter normally again.
+- This browser extension **requires access to localStorage**. By default all browser's support this. However, if you or an admin on your system have made changes to the browser settings, in which local storage is not enabled, the extension will not work. There are currently no thoughts for determining a workaround as all browsers support this functionality by default.
 
-- I ran across an intermittent issue in which, navigating to a 'matched page' did not start the timer as expected.
+- If you find your browser is unresponsive in some ways, such as copy/paste not working, you may have clicked outside a browser's timed tab, and that tab's timer has gone off (perhaps even more than once). Check to see if you have a timer alarm (an "Ok/Cancel" confirm dialog box) that went off from the last page you were on. While the confirm dialog box is open, it can adversely affect the browser's normal operations. If this becomes a problem, we can look to implement desktop notifications as an option, and/or possibly make that the default option.
 
-  > Double check the URL should indeed be a match, and that it is indeed active.
+- Some Chromium-based browsers (e.g. Vivaldi) do not support the use of (alert|confirm) dialog boxes when sent from an extension's background script. @TODO: Desktop Notifications appear to be the most viable alternative.
 
-  If you find a timer will not start on a page it should, and these items are in order, and if you can recreate it, please send me the steps to recreate it via the issues tab in GitHub.
+This in mind, in some browsers, the confirm alerts do not work: You will only see the badge icon counter increment, and the badge icon's color should turn a dark red.
 
-  *To fix the issue*; refreshing the page should trigger the timer.
+- If you 'miss' clicking OK or Cancel on three or more confirms, the extension's icon stops counting after the first two increments. If your last click was Cancel, the next Cancel will increment the counter normally again.
 
-  However! I'm actually hoping to never see the issue again as I've applied numerous proactive fixes. <code>:)</code>
+- If you find a timer will not start on a page it should, and the timer is indeed active, AND if you can recreate it, please send me the steps to recreate it via the issues tab in GitHub.
 
-- Some Chromium-based browsers (e.g. Vivaldi) do not support the use of (alert|confirm) dialog boxes when sent from an extension's background script. @TODO: Notifications appear to be the most viable alternative.
-
-This in mind, in some browsers, the confirm alerts do not work: You will only see the badge icon counter increment. This is unfortunate being Vivaldi is the browser I use to peruse Twitter. @TODO: :)
+  *To try to fix the issue*; try going to another tab, and then returning to the tab expected to start a timer.
 
 #### Open Source
 
@@ -226,6 +224,33 @@ When a page is first hit*, the background script grabs the URL from the content 
   One approach for storing state accessible to the Background Script---being there are only two variables used in limited fashion---is to use HTML5's `window.localStorage`. Once applied, it also appeared to fix a newfound issue---simply refreshing the page was also resetting the timer.
 
   I'm hopeful this fix is a keeper. :-)
+
+> 0.0.10 - 2020-07-17
+
+- Previous fix turned out to be solid, but only partial. 10th time is a charm.
+
+  As was done previously with the two primary navigational variables (`inFocus` and `lastMatch`), the remaining variables in the Background Page script have also been swapped out with `localStorage`.
+
+- As an added bonus, the badge icon now also changes to a dark red color if the madness isn't stopped (i.e. the Cancel button is clicked).
+
+- These FAQs have been added and updated (instructions, known issues, and version history).
+
+- The TMT [https://kdcinfo.com/app/tmt/](landing page) was generic'd down. Removed a triple copy of these FAQs---now just providing an overview and a link to the Chrome Store or back here to GitHub.
+
+### @TODO:
+
+- Make it optional to stop the timer when the browser loses focus.
+
+- Make color of icon alerts customizable.
+
+Optional items would be done in the extension's pop-up page.
+
+> Technical Approach Thoughts
+
+  - From the pop-up script, an onMessage can be sent to the background script to set the preferences in localStorage alongside their 'arrayToMatchFromStorage' and 'mapFromStorage' equivalents.
+  - Then pop-up would send a request to the background script to 'get' the values for display in the pop-up options.
+  - I believe the localStorage differs between pop-up and background scripts.
+  - Maybe can use `sync`, but might be overboard. Messaging isn't difficult; just might want to better document the key entry points.
 
 ---
 
