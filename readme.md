@@ -32,9 +32,7 @@ The intent of this extension was to be an annoyance to help get you (okay, me) o
   2. Find the TMT extension, and
   3. Click the pin icon.
 
-**^Browser Compatibility:** Although there can be some nuances (and bugs), browser extensions available from the
-Chrome Web Store are also available for other [https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active](Chromium-based browsers)
-such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
+**^Browser Compatibility:** Although there can be some nuances (and bugs), browser extensions available from the Chrome Web Store are also available for other [Chromium-based browsers][1] such as Microsoft Edge, Brave, Opera, Vivaldi, Comodo Dragon, etc.
 
 ### #3 - Usage Instructions
 
@@ -268,3 +266,5 @@ Optional items would be done in the extension's pop-up page.
   - https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
 
 ---
+
+[1]: https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
