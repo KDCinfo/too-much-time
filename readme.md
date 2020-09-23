@@ -243,6 +243,10 @@ When a page is first hit*, the background script grabs the URL from the content 
 
 - The TMT [https://kdcinfo.com/app/tmt/](landing page) was generic'd down. Removed a triple copy of these FAQs---now just providing an overview and a link to the Chrome Store or back here to GitHub.
 
+> 0.0.11 - 2020-09-23
+
+- Removed two `console.log`s.
+
 ### #13 - @TODO:
 
 - Make it optional to stop the timer when the browser loses focus.

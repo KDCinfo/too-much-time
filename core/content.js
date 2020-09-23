@@ -18,7 +18,7 @@
 
 function returnTheUrl() { // async / returns a Promise
 
-  console.log('[3] [content] -> returnTheUrl');
+  // console.log('[3] [content] -> returnTheUrl');
 
   return new Promise((resolve, reject) => {
     if (isGood('chrome') && isGood('chrome.runtime') && isGood('chrome.runtime.sendMessage')) {
@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   //              ___ console.log(sender);       // {id: "helhgfihaejomkikjadlnjdknkbinkac", origin: "null"}
   //              ___ console.log(sendResponse); // () { [native code] }
 
-  console.log('[2] content -> onMessage');
+  // console.log('[2] content -> onMessage');
 
   if (request.message === 'TabUpdated') {
 
