@@ -261,13 +261,31 @@ Optional items would be done in the extension's pop-up page.
   - Then pop-up would send a request to the background script to 'get' the values for display in the pop-up options.
   - I believe the localStorage differs between pop-up and background scripts.
   - Maybe can use `sync`, but might be overboard. Messaging isn't difficult; just might want to better document the key entry points.
+Free Countdown Timer for Your Website
+Our free countdown timer is an accurate timer that you can use for your website or blog. It can help you count down to any special event, such as a birthday or anniversary. There are many ways for you personalize your own countdown timer, simply by filling out the gray form below on this page.
+
+We also have Free Clocks available for your website or blog.
+
+Main Features
+Our free countdown timer is also referred to as a countdown clock. Here are some reasons why people use our countdown timer:
+
+The countdown is accurate — the clocks display current time, even if the user's computer clock is wrong.
+You have choices regarding DST — there are different options on how to deal with daylight saving time (DST) with regard to your countdown timer. Read more about the countdown timer and DST.
+The countdown takes into account any time zone — all the major time zones are supported.
+It is highly configurable — choose different backgrounds, text options, colors and fonts.
+You can choose units to display — from days to milliseconds.
+No registration is needed — the HTML code is available immediately.
+Use the form below to customize your own countdown timer. A small preview window at the bottom right corner of your web page should also appear next to the form.
+
+You may place up to six clocks and countdown timers on a single page. If more than two clocks/timers are used, a separate link to timeanddate.com should be provided on the page. To use the service you must be able to add HTML directly to your web page and IFRAME tags must be allowed.
+
 
 ### #14 - References
 
 > `*`Chromium-based Browser References:
 
-  - https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
-  - https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
+ ➡  https://en.wikipedia.org/wiki/Chromium_(web_browser)#Active
+ ➡ https://www.quora.com/Can-Chrome-extensions-be-used-in-other-web-browsers-How
 
 ---
 
